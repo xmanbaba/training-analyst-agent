@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Needs Analysis Agent - Free Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@7.6.0/build/index.js"></script>
+    <style>
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            color: #6b7280;
+        }
+        .tab-btn.active {
+            color: #3b82f6;
+            background-color: #eff6ff;
+            border-bottom: 2px solid #3b82f6;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 font-sans">
+    <div class="max-w-6xl mx-auto p-4">
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center mb-4">
+                <div class="gradient-bg p-3 rounded-full">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <h1 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                Training Needs Analysis Agent
+            </h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Your strategic L&D partner powered by Google Gemini AI (Free Version)
+            </p>
+        </div>
+
+        <div id="apiSetup" class="bg-white rounded-2xl shadow-xl border border-gray-200 mb-8 overflow-hidden">
+            <div class="gradient-bg px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-3a1 1 0 011-1h2.586l6.414-6.414A6 6 0 0121 9z"></path>
+                    </svg>
+                    API Configuration
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label for="apiKey" class="block text-sm font-medium text-gray-700 mb-2">
+                        Google Gemini API Key (Free) <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="password"
+                        id="apiKey"
+                        placeholder="Enter your Google Gemini API key here..."
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <p class="text-xs text-gray-500 mt-1">
+                        Get your FREE API key from <a href="https://makersuite.google.com/app/apikey" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>
+                    </p>
+                </div>
+                <button
+                    id="saveApiKey"
+                    type="button"
+                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                    Save API Key
+                </button>
+                <span id="apiStatus" class="ml-3 text-sm"></span>
+            </div>
+        </div>
+
+        <div id="inputSection" class="bg-white rounded-2xl shadow-xl border border-gray-200 mb-8 overflow-hidden" style="display: none;">
+            <div class="gradient-bg px-6 py-4">
+                <h2 class="text-xl font-semibold text-white flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Job Description Analysis
+                </h2>
+            </div>
+            <div class="p-6">
+                <textarea
+                    id="jobDescription"
+                    placeholder="Paste your job description here... Include responsibilities, requirements, skills, and any other relevant details."
+                    class="w-full h-40 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                ></textarea>
+                <div class="flex justify-between items-center mt-4">
+                    <p class="text-sm text-gray-500">
+                        <span id="charCount">0</span> characters • The more detailed, the better the analysis
+                    </p>
+                    <button
+                        id="analyzeBtn"
+                        class="gradient-bg text-white px-6 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center"
+                    >
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        <span id="btnText">Analyze Training Needs</span>
+                        <div id="loadingSpinner" class="loading-spinner ml-2" style="display: none;"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="resultsSection" style="display: none;">
+            <div id="jobOverview" class="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 mb-6">
+                <h2 id="jobTitle" class="text-2xl font-bold text-gray-800 mb-2"></h2>
+                <div class="flex items-center text-green-600">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span class="font-semibold">Analysis Complete</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+                <div class="flex border-b border-gray-200" id="tabsContainer">
+                    <button class="tab-btn active flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium" data-tab="skills">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        Critical Skills
+                    </button>
+                    <button class="tab-btn flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium" data-tab="gaps">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        Skill Gaps
+                    </button>
+                    <button class="tab-btn flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium" data-tab="training">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        Training Plan
+                    </button>
+                    <button class="tab-btn flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium" data-tab="benchmarks">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                        Industry Insights
+                    </button>
+                    <button class="tab-btn flex-1 flex items-center justify-center px-4 py-3 text-sm font-medium" data-tab="roi">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        ROI Analysis
+                    </button>
+                </div>
+
+                <div class="p-6">
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="text-center sm:text-left">
+                                <h4 class="font-semibold text-gray-800 mb-1">Share & Export</h4>
+                                <p class="text-sm text-gray-600">Download the report or generate a shareable link.</p>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                <button
+                                    id="shareBtn"
+                                    class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center text-sm font-medium"
+                                    title="Share Analysis Link"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"></path>
+                                    </svg>
+                                    Generate Share Link
+                                </button>
+
+                                <button
+                                    id="exportWordBtn"
+                                    class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center text-sm font-medium"
+                                    title="Export as Word Document"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Download Word Doc
+                                </button>
+                                
+                                <button
+                                    id="exportPdfBtn"
+                                    class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors flex items-center justify-center text-sm font-medium"
+                                    title="Export as PDF"
+                                >
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Download PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pdf-progress" class="hidden text-center text-gray-600 mb-4">
+                        <span class="loading-spinner mr-2"></span>
+                        Generating PDF, please wait...
+                    </div>
+
+                    <div id="word-progress" class="hidden text-center text-gray-600 mb-4">
+                        <span class="loading-spinner mr-2"></span>
+                        Generating Word document, please wait...
+                    </div>
+                    
+                    <div id="tabContent">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8 text-gray-500">
+            <p class="flex items-center justify-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                </svg>
+                Powered by Google Gemini AI (FREE) • Transforming L&D Strategy
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let apiKey = '';
+        let analysisData = null;
+        let currentTab = 'skills';
+
+        // DOM elements
+        const apiKeyInput = document.getElementById('apiKey');
+        const saveApiKeyBtn = document.getElementById('saveApiKey');
+        const apiStatus = document.getElementById('apiStatus');
+        const apiSetup = document.getElementById('apiSetup');
+        const inputSection = document.getElementById('inputSection');
+        const jobDescriptionTextarea = document.getElementById('jobDescription');
+        const charCount = document.getElementById('charCount');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const btnText = document.getElementById('btnText');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const resultsSection = document.getElementById('resultsSection');
+        const jobTitle = document.getElementById('jobTitle');
+        const tabContent = document.getElementById('tabContent');
+
+        // New buttons
+        const shareBtn = document.getElementById('shareBtn');
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const exportWordBtn = document.getElementById('exportWordBtn');
+        const pdfProgress = document.getElementById('pdf-progress');
+        const wordProgress = document.getElementById('word-progress');
+
+
+        // API Key Management
+        saveApiKeyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const key = apiKeyInput.value.trim();
+            
+            if (key && key.length > 10) {
+                try {
+                    apiKey = key;
+                    localStorage.setItem('gemini_api_key', key);
+                    apiStatus.innerHTML = '<span style="color: #16a34a;">✓ API Key saved successfully</span>';
+                    
+                    setTimeout(() => {
+                        apiSetup.style.display = 'none';
+                        inputSection.style.display = 'block';
+                    }, 1000);
+                } catch (error) {
+                    apiStatus.innerHTML = '<span style="color: #dc2626;">✗ Error saving API key</span>';
+                }
+            } else {
+                apiStatus.innerHTML = '<span style="color: #dc2626;">✗ Please enter a valid API key (must be longer than 10 characters)</span>';
+            }
+        });
+
+        // Load saved API key
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const savedKey = localStorage.getItem('gemini_api_key');
+                
+                if (savedKey && savedKey.length > 10) {
+                    apiKey = savedKey;
+                    apiKeyInput.value = savedKey;
+                    apiStatus.innerHTML = '<span style="color: #16a34a;">✓ API Key loaded from storage</span>';
+                    apiSetup.style.display = 'none';
+                    inputSection.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading saved API key:', error);
+            }
+            
+            loadSharedAnalysis();
+        });
+
+        // Character count
+        jobDescriptionTextarea.addEventListener('input', (e) => {
+            charCount.textContent = e.target.value.length;
+        });
+
+        // Analyze button
+        analyzeBtn.addEventListener('click', analyzeJobDescription);
+
+        // Tab switching
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-btn') || e.target.closest('.tab-btn')) {
+                const tabBtn = e.target.classList.contains('tab-btn') ? e.target : e.target.closest('.tab-btn');
+                const tab = tabBtn.dataset.tab;
+                switchTab(tab);
+            }
+        });
+
+        // Main analysis function
+        async function analyzeJobDescription() {
+            const jobDesc = jobDescriptionTextarea.value.trim();
+            
+            if (!jobDesc) {
+                alert('Please enter a job description to analyze');
+                return;
+            }
+
+            if (!apiKey) {
+                alert('Please set your API key first');
+                return;
+            }
+
+            // Show loading state
+            analyzeBtn.disabled = true;
+            btnText.textContent = 'Analyzing...';
+            loadingSpinner.style.display = 'inline-block';
+
+            try {
+                const prompt = `You are an expert L&D Training Needs Analysis Agent. Analyze this job description and provide a comprehensive training needs analysis.
+
+Job Description:
+${jobDesc}
+
+Please respond with a JSON object containing the following structure:
+
+{
+    "jobTitle": "extracted job title",
+    "criticalSkills": [
+        {
+            "skill": "skill name",
+            "category": "technical/soft/leadership/domain",
+            "priority": "high/medium/low",
+            "currentMarketDemand": "description of market demand",
+            "description": "why this skill is critical for this role"
+        }
+    ],
+    "skillGaps": [
+        {
+            "gap": "potential gap name",
+            "impact": "high/medium/low",
+            "likelihood": "high/medium/low",
+            "description": "detailed description of the gap and its implications"
+        }
+    ],
+    "trainingPlan": {
+        "immediate": [
+            {
+                "program": "training program name",
+                "duration": "estimated duration",
+                "delivery": "online/in-person/blended",
+                "priority": "high/medium/low",
+                "description": "what this training covers"
+            }
+        ],
+        "shortTerm": [
+            {
+                "program": "training program name",
+                "duration": "estimated duration",
+                "delivery": "online/in-person/blended",
+                "priority": "high/medium/low",
+                "description": "what this training covers"
+            }
+        ],
+        "longTerm": [
+            {
+                "program": "training program name",
+                "duration": "estimated duration",
+                "delivery": "online/in-person/blended",
+                "priority": "high/medium/low",
+                "description": "what this training covers"
+            }
+        ]
+    },
+    "industryBenchmarks": {
+        "averageTrainingHours": "number",
+        "topSkillsTrends": ["skill1", "skill2", "skill3"],
+        "emergingSkills": ["skill1", "skill2"],
+        "recommendations": "strategic recommendations"
+    },
+    "roi": {
+        "estimatedCost": "cost range",
+        "expectedBenefits": ["benefit1", "benefit2", "benefit3"],
+        "timeToValue": "estimated time",
+        "successMetrics": ["metric1", "metric2", "metric3"]
+    }
+}
+
+IMPORTANT: Your entire response must be valid JSON only. Do not include any text outside the JSON structure.`;
+
+                const requestBody = {
+                    contents: [{
+                        parts: [{
+                            text: prompt
+                        }]
+                    }]
+                };
+
+                const models = [
+                    'gemini-1.5-flash',
+                    'gemini-1.5-pro',
+                    'gemini-pro'
+                ];
+
+                let response = null;
+                let lastError = null;
+
+                for (let i = 0; i < models.length; i++) {
+                    const model = models[i];
+                    
+                    try {
+                        response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(requestBody)
+                        });
+
+                        if (response.ok) {
+                            break;
+                        } else {
+                            const errorText = await response.text();
+                            lastError = errorText;
+                            response = null;
+                        }
+                    } catch (error) {
+                        lastError = error.message;
+                        response = null;
+                    }
+                }
+
+                if (!response || !response.ok) {
+                    throw new Error(`All models failed. Last error: ${lastError}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+                    let responseText = data.candidates[0].content.parts[0].text;
+                    responseText = responseText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+                    
+                    try {
+                        analysisData = JSON.parse(responseText);
+                        displayResults();
+                    } catch (parseError) {
+                        console.error('JSON Parse Error:', parseError);
+                        alert('The AI response was not in the expected JSON format. Please try again. This sometimes happens with free API keys.');
+                    }
+                } else {
+                    alert('Unexpected response format from Gemini API. Please check your API key and try again.');
+                }
+
+            } catch (error) {
+                console.error('Analysis failed:', error);
+                alert(`Analysis failed: ${error.message}`);
+            } finally {
+                // Reset loading state
+                analyzeBtn.disabled = false;
+                btnText.textContent = 'Analyze Training Needs';
+                loadingSpinner.style.display = 'none';
+            }
+        }
+
+        // Display results
+        function displayResults() {
+            if (!analysisData) return;
+
+            jobTitle.textContent = analysisData.jobTitle || 'Job Analysis Complete';
+            resultsSection.style.display = 'block';
+            
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            switchTab('skills');
+        }
+
+        // Tab switching function
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-50', 'text-blue-700', 'border-b-2', 'border-blue-700');
+                btn.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+            });
+            
+            const activeTab = document.querySelector(`[data-tab="${tab}"]`);
+            activeTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:bg-gray-50');
+            activeTab.classList.add('active', 'bg-blue-50', 'text-blue-700', 'border-b-2', 'border-blue-700');
+            
+            // Update content
+            displayTabContent(tab);
+        }
+
+        // Display tab content
+        function displayTabContent(tab) {
+            if (!analysisData) return;
+
+            let content = '';
+
+            switch (tab) {
+                case 'skills':
+                    content = generateSkillsContent();
+                    break;
+                case 'gaps':
+                    content = generateGapsContent();
+                    break;
+                case 'training':
+                    content = generateTrainingContent();
+                    break;
+                case 'benchmarks':
+                    content = generateBenchmarksContent();
+                    break;
+                case 'roi':
+                    content = generateROIContent();
+                    break;
+            }
+
+            tabContent.innerHTML = content;
+        }
+
+        // Content generation functions
+        function generateSkillsContent() {
+            if (!analysisData.criticalSkills) return '<p>No critical skills data available.</p>';
+
+            let content = '<h3 class="text-lg font-semibold text-gray-800 mb-4">Critical Skills Analysis</h3>';
+            content += '<div class="grid gap-4 md:grid-cols-2">';
+
+            analysisData.criticalSkills.forEach(skill => {
+                const priorityClass = getPriorityClass(skill.priority);
+                content += `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">${skill.skill}</h4>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium border ${priorityClass}">
+                                ${skill.priority}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">${skill.description}</p>
+                        <p class="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                            <strong>Market Demand:</strong> ${skill.currentMarketDemand}
+                        </p>
+                    </div>
+                `;
+            });
+
+            content += '</div>';
+            return content;
+        }
+
+        function generateGapsContent() {
+            if (!analysisData.skillGaps) return '<p>No skill gaps data available.</p>';
+
+            let content = '<h3 class="text-lg font-semibold text-gray-800 mb-4">Identified Skill Gaps</h3>';
+            content += '<div class="space-y-4">';
+
+            analysisData.skillGaps.forEach(gap => {
+                const impactClass = getPriorityClass(gap.impact);
+                const likelihoodClass = getPriorityClass(gap.likelihood);
+                content += `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <h4 class="font-semibold text-gray-800">${gap.gap}</h4>
+                            <div class="flex space-x-2">
+                                <span class="px-2 py-1 rounded-full text-xs font-medium border ${impactClass}">
+                                    Impact: ${gap.impact}
+                                </span>
+                                <span class="px-2 py-1 rounded-full text-xs font-medium border ${likelihoodClass}">
+                                    Likelihood: ${gap.likelihood}
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600">${gap.description}</p>
+                    </div>
+                `;
+            });
+
+            content += '</div>';
+            return content;
+        }
+
+        function generateTrainingContent() {
+            if (!analysisData.trainingPlan) return '<p>No training plan data available.</p>';
+
+            let content = '<h3 class="text-lg font-semibold text-gray-800 mb-4">Strategic Training Plan</h3>';
+
+            const timeframes = [
+                { key: 'immediate', title: 'Immediate (0-3 months)' },
+                { key: 'shortTerm', title: 'Short Term (3-6 months)' },
+                { key: 'longTerm', title: 'Long Term (6-12 months)' }
+            ];
+
+            timeframes.forEach(timeframe => {
+                if (analysisData.trainingPlan[timeframe.key] && analysisData.trainingPlan[timeframe.key].length > 0) {
+                    content += `
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-700 mb-3">${timeframe.title}</h4>
+                            <div class="grid gap-3 md:grid-cols-2">
+                    `;
+                    analysisData.trainingPlan[timeframe.key].forEach(plan => {
+                        const priorityClass = getPriorityClass(plan.priority);
+                        content += `
+                            <div class="border border-gray-200 rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h5 class="font-medium text-gray-900">${plan.program}</h5>
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium border ${priorityClass}">${plan.priority}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-2">${plan.description}</p>
+                                <p class="text-xs text-gray-500">
+                                    <strong>Duration:</strong> ${plan.duration} • <strong>Delivery:</strong> ${plan.delivery}
+                                </p>
+                            </div>
+                        `;
+                    });
+                    content += `
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            return content;
+        }
+
+        function generateBenchmarksContent() {
+            if (!analysisData.industryBenchmarks) return '<p>No industry benchmarks data available.</p>';
+
+            let content = '<h3 class="text-lg font-semibold text-gray-800 mb-4">Industry Insights & Benchmarks</h3>';
+            content += `<div class="space-y-4">
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Average Training Hours</h4>
+                                <p class="text-sm text-gray-600">${analysisData.industryBenchmarks.averageTrainingHours}</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Top Skills Trends</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600">
+                                    ${analysisData.industryBenchmarks.topSkillsTrends.map(skill => `<li>${skill}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Emerging Skills</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600">
+                                    ${analysisData.industryBenchmarks.emergingSkills.map(skill => `<li>${skill}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Strategic Recommendations</h4>
+                                <p class="text-sm text-gray-600">${analysisData.industryBenchmarks.recommendations}</p>
+                            </div>
+                        </div>`;
+            return content;
+        }
+
+        function generateROIContent() {
+            if (!analysisData.roi) return '<p>No ROI analysis data available.</p>';
+
+            let content = '<h3 class="text-lg font-semibold text-gray-800 mb-4">Return on Investment (ROI) Analysis</h3>';
+            content += `<div class="space-y-4">
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Estimated Cost</h4>
+                                <p class="text-sm text-gray-600">${analysisData.roi.estimatedCost}</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Expected Benefits</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600">
+                                    ${analysisData.roi.expectedBenefits.map(benefit => `<li>${benefit}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Time to Value</h4>
+                                <p class="text-sm text-gray-600">${analysisData.roi.timeToValue}</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <h4 class="font-semibold text-gray-700">Success Metrics</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600">
+                                    ${analysisData.roi.successMetrics.map(metric => `<li>${metric}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>`;
+            return content;
+        }
+
+        function getPriorityClass(priority) {
+            const normalizedPriority = String(priority).toLowerCase();
+            if (normalizedPriority === 'high') return 'bg-red-100 text-red-700 border-red-200';
+            if (normalizedPriority === 'medium') return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            if (normalizedPriority === 'low') return 'bg-green-100 text-green-700 border-green-200';
+            return 'bg-gray-100 text-gray-700 border-gray-200';
+        }
+
+        // --- FIXED CODE FOR SHARE AND PDF ---
+
+        function loadSharedAnalysis() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            if (encodedData) {
+                try {
+                    // Reverse the encoding process
+                    const decodedUriComponent = atob(encodedData);
+                    const decodedData = decodeURIComponent(decodedUriComponent);
+                    analysisData = JSON.parse(decodedData);
+                    inputSection.style.display = 'none';
+                    apiSetup.style.display = 'none';
+                    displayResults();
+                } catch (e) {
+                    console.error('Failed to load shared analysis:', e);
+                    alert('Failed to load shared analysis. The link may be invalid or expired.');
+                }
+            }
+        }
+
+        shareBtn.addEventListener('click', () => {
+            if (analysisData) {
+                try {
+                    // First, stringify the object
+                    const jsonString = JSON.stringify(analysisData);
+
+                    // Then, encode the string for URI compatibility (handles all UTF-8 characters)
+                    const uriEncodedData = encodeURIComponent(jsonString);
+
+                    // Finally, convert to Base64
+                    const encodedData = btoa(uriEncodedData);
+                    
+                    const shareUrl = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        alert('Share link copied to clipboard! ✅');
+                    }).catch(err => {
+                        console.error('Failed to copy text:', err);
+                        // Fallback for older browsers
+                        const tempInput = document.createElement('input');
+                        document.body.appendChild(tempInput);
+                        tempInput.value = shareUrl;
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                        alert('Share link copied to clipboard! (Fallback method)');
+                    });
+                } catch (e) {
+                    console.error('Failed to generate share link:', e);
+                    alert('Failed to generate a shareable link. Please try analyzing again.');
+                }
+            } else {
+                alert('Please analyze a job description first to generate a shareable link.');
+            }
+        });
+
+        // FIXED PDF Export
+        exportPdfBtn.addEventListener('click', () => {
+            if (!analysisData) {
+                alert('No analysis results to export.');
+                return;
+            }
+            
+            pdfProgress.classList.remove('hidden');
+
+            const contentHTML = `
+                <div style="font-family: ui-sans-serif, system-ui, sans-serif; color: #1f2937; padding: 10mm;">
+                    <h1 style="font-size: 2.25rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem; text-align: center;">Training Needs Analysis Report</h1>
+                    <p style="font-size: 1.125rem; color: #4b5563; margin-bottom: 2rem; text-align: center;">
+                        Job Title: <span style="font-weight: 600;">${analysisData.jobTitle || 'N/A'}</span>
+                    </p>
+                    
+                    <div style="margin-bottom: 2.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Critical Skills Analysis</h3>
+                        ${generateSkillsContent()}
+                    </div>
+                    <div style="margin-bottom: 2.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Identified Skill Gaps</h3>
+                        ${generateGapsContent()}
+                    </div>
+                    <div style="margin-bottom: 2.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Strategic Training Plan</h3>
+                        ${generateTrainingContent()}
+                    </div>
+                    <div style="margin-bottom: 2.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Industry Insights & Benchmarks</h3>
+                        ${generateBenchmarksContent()}
+                    </div>
+                    <div style="margin-bottom: 2.5rem;">
+                        <h3 style="font-size: 1.25rem; font-weight: 600; color: #111827; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">Return on Investment (ROI) Analysis</h3>
+                        ${generateROIContent()}
+                    </div>
+                </div>
+            `;
+
+            const opt = {
+                margin: 10,
+                filename: 'Training_Needs_Analysis_Report.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(contentHTML).save().then(() => {
+                pdfProgress.classList.add('hidden');
+            });
+        });
+
+        // NEW Word Export
+        exportWordBtn.addEventListener('click', async () => {
+            if (!analysisData) {
+                alert('No analysis results to export.');
+                return;
+            }
+
+            wordProgress.classList.remove('hidden');
+
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel, Alignment, Table, TableRow, TableCell } = docx;
+
+            const doc = new Document({
+                sections: [{
+                    children: [
+                        new Paragraph({
+                            text: "Training Needs Analysis Report",
+                            heading: HeadingLevel.TITLE,
+                            alignment: Alignment.CENTER,
+                        }),
+                        new Paragraph({
+                            text: `Job Title: ${analysisData.jobTitle || 'N/A'}`,
+                            alignment: Alignment.CENTER,
+                            spacing: { after: 200 },
+                        }),
+                        
+                        // Critical Skills Section
+                        new Paragraph({
+                            text: "Critical Skills Analysis",
+                            heading: HeadingLevel.HEADING1,
+                            spacing: { before: 200, after: 100 },
+                        }),
+                        ...analysisData.criticalSkills.map(skill => [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({ text: skill.skill, bold: true }),
+                                    new TextRun({ text: ` (${skill.priority})`, break: 1, color: "FF0000" }),
+                                ],
+                            }),
+                            new Paragraph({ text: skill.description }),
+                            new Paragraph({ text: `Market Demand: ${skill.currentMarketDemand}`, size: 18, }),
+                            new Paragraph({ text: "", spacing: { after: 100 } }),
+                        ]).flat(),
+
+                        // Skill Gaps Section
+                        new Paragraph({
+                            text: "Identified Skill Gaps",
+                            heading: HeadingLevel.HEADING1,
+                            spacing: { before: 200, after: 100 },
+                        }),
+                        ...analysisData.skillGaps.map(gap => [
+                            new Paragraph({
+                                children: [
+                                    new TextRun({ text: gap.gap, bold: true }),
+                                    new TextRun({ text: ` (Impact: ${gap.impact}, Likelihood: ${gap.likelihood})`, break: 1, }),
+                                ],
+                            }),
+                            new Paragraph({ text: gap.description }),
+                            new Paragraph({ text: "", spacing: { after: 100 } }),
+                        ]).flat(),
+
+                        // Training Plan Section
+                        new Paragraph({
+                            text: "Strategic Training Plan",
+                            heading: HeadingLevel.HEADING1,
+                            spacing: { before: 200, after: 100 },
+                        }),
+                        ...Object.entries(analysisData.trainingPlan).map(([key, plans]) => [
+                            new Paragraph({
+                                text: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1') + ' Term',
+                                heading: HeadingLevel.HEADING2,
+                                spacing: { after: 100 },
+                            }),
+                            ...plans.map(plan => [
+                                new Paragraph({
+                                    children: [
+                                        new TextRun({ text: plan.program, bold: true }),
+                                        new TextRun({ text: ` (${plan.priority})`, break: 1, }),
+                                    ],
+                                }),
+                                new Paragraph({ text: plan.description }),
+                                new Paragraph({ text: `Duration: ${plan.duration} • Delivery: ${plan.delivery}`, size: 18 }),
+                                new Paragraph({ text: "", spacing: { after: 100 } }),
+                            ]).flat(),
+                        ]).flat(),
+
+                        // Benchmarks Section
+                        new Paragraph({
+                            text: "Industry Insights & Benchmarks",
+                            heading: HeadingLevel.HEADING1,
+                            spacing: { before: 200, after: 100 },
+                        }),
+                        new Paragraph({ text: `Average Training Hours: ${analysisData.industryBenchmarks.averageTrainingHours}` }),
+                        new Paragraph({ text: "Top Skills Trends:", bold: true, spacing: { after: 50 } }),
+                        ...analysisData.industryBenchmarks.topSkillsTrends.map(skill => new Paragraph({ text: `- ${skill}`, alignment: Alignment.LEFT })),
+                        new Paragraph({ text: "Emerging Skills:", bold: true, spacing: { before: 100, after: 50 } }),
+                        ...analysisData.industryBenchmarks.emergingSkills.map(skill => new Paragraph({ text: `- ${skill}`, alignment: Alignment.LEFT })),
+                        new Paragraph({ text: "Strategic Recommendations:", bold: true, spacing: { before: 100, after: 50 } }),
+                        new Paragraph({ text: analysisData.industryBenchmarks.recommendations }),
+                        
+                        // ROI Section
+                        new Paragraph({
+                            text: "Return on Investment (ROI) Analysis",
+                            heading: HeadingLevel.HEADING1,
+                            spacing: { before: 200, after: 100 },
+                        }),
+                        new Paragraph({ text: `Estimated Cost: ${analysisData.roi.estimatedCost}` }),
+                        new Paragraph({ text: "Expected Benefits:", bold: true, spacing: { after: 50 } }),
+                        ...analysisData.roi.expectedBenefits.map(benefit => new Paragraph({ text: `- ${benefit}` })),
+                        new Paragraph({ text: `Time to Value: ${analysisData.roi.timeToValue}`, spacing: { before: 100 } }),
+                        new Paragraph({ text: "Success Metrics:", bold: true, spacing: { after: 50 } }),
+                        ...analysisData.roi.successMetrics.map(metric => new Paragraph({ text: `- ${metric}` })),
+                    ],
+                }],
+            });
+
+            Packer.toBlob(doc).then(blob => {
+                saveAs(blob, `Training_Needs_Analysis_Report_${analysisData.jobTitle || 'Untitled'}.docx`);
+                wordProgress.classList.add('hidden');
+            }).catch(err => {
+                console.error("Error creating DOCX:", err);
+                alert("Failed to create Word document. Please try again.");
+                wordProgress.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
